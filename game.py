@@ -6,59 +6,38 @@ import random
 W, H = 1280, 720
 
 screen = pygame.display.set_mode((W, H))
-pygame.display.set_caption("dino with patterns")
+pygame.display.set_caption("One square")
 clock = pygame.time.Clock()
 
-x = 200
-y = 200
-g = 10
-ax = 400
-ay = 400
+class Player:
+    def __init__(self):
+        self.x = W//2
+        self.y = H//2
+        self.side = 10
+        self.speed = 3
+        self.pawa = 1
+        self.hp = 100
+    def update(self):
+        if keys[pygame.K_w] and self.y > 0:
+            p.y -= p.speed
+        if keys[pygame.K_s] and self.y < H - self.side:
+            p.y += p.speed
+        if keys[pygame.K_a] and self.x > 0:
+            p.x -= p.speed
+        if keys[pygame.K_d] and self.x < W - self.side:
+            p.x += p.speed
+        pygame.draw.rect(screen,(0,0,0),(int(self.x),int(self.y),self.side,self.side),0)
 
-width = 20
-height = 20
-j = True
-aj = True
-vel = 10
+p = Player()
+
 while True:
+    screen.fill((29, 124, 29)) 
+
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-
     keys = pygame.key.get_pressed()
-    
-    if y < H-20:
-        y += g
-        j = False
-    if ay < H-20:
-        ay += g
-        aj = False
-    if y == H-20:
-        j = True
-    if ay == H-20:
-        aj = True
-
-    if keys[pygame.K_a] and x > 0:
-        x -= vel
-    if keys[pygame.K_d] and x < W - width:
-        x += vel
-    if keys[pygame.K_w] and y > 0 and j:
-        y -= 100
-        j = False
-    
-    if keys[pygame.K_LEFT] and ax > 0:
-        ax -= vel
-    if keys[pygame.K_RIGHT] and ax < W - width:
-        ax += vel
-    
-    if keys[pygame.K_UP] and ay > 0 and aj:
-        ay -= 100
-        aj = False
-
-
-    screen.fill((0, 0, 0)) 
-    pygame.draw.rect(screen, (255, 0, 0), (x, y, width, height))
-    pygame.draw.rect(screen, (255, 0, 0), (ax, ay, width, height))
-    pygame.display.update()
+    p.update()
+    pygame.display.flip()
     clock.tick(60)

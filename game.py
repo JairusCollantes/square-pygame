@@ -69,7 +69,7 @@ class Enemy:
             self.x = W + 20
         self.speed = 1
         self.radius = 7
-        self.damage = 100
+        self.damage = 1
     def move(self, x,y):
         dx = x - self.x
         dy = y - self.y

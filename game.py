@@ -123,20 +123,18 @@ def collision():
                 game = False
     for weapon in b[:]:
         for enemy in c[:]:
-            # Find closest point on weapon square to enemy circle
             closest_x = max(weapon.rect.left, min(enemy.x, weapon.rect.right))
             closest_y = max(weapon.rect.top, min(enemy.y, weapon.rect.bottom))
             
             distance_x = enemy.x - closest_x
             distance_y = enemy.y - closest_y
             distance = math.sqrt(distance_x * distance_x + distance_y * distance_y)
-            
-            # If weapon hits enemy, remove both and spawn XP gems
+        
             if distance < enemy.radius:
                 c.remove(enemy)
                 if weapon in b:
                     b.remove(weapon)
-                break  # Stop checking this weapon against other enemies
+                break
 
 def ui():
     font = pygame.font.SysFont(None, 48)

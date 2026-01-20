@@ -32,25 +32,35 @@ class Player:
 class Attack:
     def __init__(self,x,y):
         self.side = 5
-        self.t = 60
-        self.square = pygame.Rect(x,y,self.side,self.side)
-        angle = random.randint(0,360)
-        self.x = math.cos(angle) * 10
-        self.y = math.sin(angle) * 10
+        self.t = 120
+        self.rect = pygame.Rect(x - self.side//2, y - self.side//2, 
+                               self.side, self.side)
+        
+        if c:
+            target = random.choice(c)
+            dx = target.x - x
+            dy = target.y - y
+            dist = max(0.1, math.sqrt(dx*dx + dy*dy))
+            self.x = (dx / dist) * 10
+            self.y = (dy / dist) * 10
+        else:
+            angle = random.uniform(0, 2 * math.pi)
+            self.x = math.cos(angle) * 10
+            self.y = math.sin(angle) * 10
     def update(self):
         self.t -= 1
         if self.t > 0:
-            self.square.x += self.x
-            self.square.y += self.y
+            self.rect.x += self.x
+            self.rect.y += self.y
             if keys[pygame.K_w]:
-                self.square.y += speed
+                self.rect.y += speed
             if keys[pygame.K_s]:
-                self.square.y -= speed
+                self.rect.y -= speed
             if keys[pygame.K_a]:
-                self.square.x += speed
+                self.rect.x += speed
             if keys[pygame.K_d]:
-                self.square.x -= speed
-            pygame.draw.rect(screen,pink,self.square,0)
+                self.rect.x -= speed
+            pygame.draw.rect(screen,pink,self.rect,0)
 
 class Enemy:
     def __init__(self):
@@ -111,6 +121,22 @@ def collision():
             c.remove(m)
             if p.hp <= 0:
                 game = False
+    for weapon in b[:]:
+        for enemy in c[:]:
+            # Find closest point on weapon square to enemy circle
+            closest_x = max(weapon.rect.left, min(enemy.x, weapon.rect.right))
+            closest_y = max(weapon.rect.top, min(enemy.y, weapon.rect.bottom))
+            
+            distance_x = enemy.x - closest_x
+            distance_y = enemy.y - closest_y
+            distance = math.sqrt(distance_x * distance_x + distance_y * distance_y)
+            
+            # If weapon hits enemy, remove both and spawn XP gems
+            if distance < enemy.radius:
+                c.remove(enemy)
+                if weapon in b:
+                    b.remove(weapon)
+                break  # Stop checking this weapon against other enemies
 
 def ui():
     font = pygame.font.SysFont(None, 48)
@@ -137,7 +163,7 @@ while True:
         screen.fill(green) 
         keys = pygame.key.get_pressed()
         t += 1
-        if t % 1 == 0:
+        if t % 60 == 0:
             spawn()
         if t % 60==0:
             spawnB()

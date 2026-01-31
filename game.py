@@ -24,7 +24,7 @@ class Player:
         self.y = H//2
         self.side = 15
         self.square = pygame.Rect(self.x-7,self.y-7,self.side,self.side)
-        self.pawa = 1
+        self.power = 1
         self.hp = 100
     def update(self):
         pygame.draw.rect(screen,black,self.square,0)
@@ -36,13 +36,23 @@ class Attack:
         self.rect = pygame.Rect(x - self.side//2, y - self.side//2, 
                                self.side, self.side)
         
-        if c:
-            target = random.choice(c)
-            dx = target.x - x
-            dy = target.y - y
-            dist = max(0.1, math.sqrt(dx*dx + dy*dy))
-            self.x = (dx / dist) * 10
-            self.y = (dy / dist) * 10
+        if enemies:
+            closest_enemy = None
+            min_dist = float('inf')
+            for enemy in enemies:
+                dx = enemy.x - x
+                dy = enemy.y - y
+                dist = math.sqrt(dx*dx + dy*dy)
+                if dist < min_dist:
+                    min_dist = dist
+                    closest_enemy = enemy
+            
+            if closest_enemy:
+                dx = closest_enemy.x - x
+                dy = closest_enemy.y - y
+                dist = max(0.1, min_dist)
+                self.x = (dx / dist) * 10
+                self.y = (dy / dist) * 10
         else:
             angle = random.uniform(0, 2 * math.pi)
             self.x = math.cos(angle) * 10
@@ -64,17 +74,17 @@ class Attack:
 
 class Enemy:
     def __init__(self):
-        spawn = random.choice(["top","bot", "rig", "lef"])
-        if spawn == "top":
+        spawn_side = random.choice(["top","bottom", "right", "left"])
+        if spawn_side == "top":
             self.x = random.randint(0,W)
             self.y = -20
-        elif spawn == "bot":
+        elif spawn_side == "bottom":
             self.x = random.randint(0,W)
             self.y = H + 20
-        elif spawn == "lef":
+        elif spawn_side == "left":
             self.y = random.randint(0,H)
             self.x = -20
-        elif spawn == "rig":
+        elif spawn_side == "right":
             self.y = random.randint(0,H)
             self.x = W + 20
         self.speed = 1
@@ -96,52 +106,63 @@ class Enemy:
             self.x -= speed
         pygame.draw.circle(screen,red,(int(self.x),int(self.y)),self.radius)
 
-p = Player()
-c = []
-t = 0
-b = []
-game = True
+player = Player()
+enemies = []
+time = 0
+bullets = []
+game_running = True
 
-def spawn():
-    c.append(Enemy())
+def spawn_enemy():
+    enemies.append(Enemy())
     
-def spawnB():
-    b.append(Attack(p.x,p.y))
+def spawn_bullet():
+    bullets.append(Attack(player.x, player.y))
 
 def collision():
-    global game
-    for m in c:
-        cx = max(min(m.x ,p.square.right), p.square.left)
-        cy = max(min(m.y ,p.square.bottom), p.square.top)
-        dx = m.x - cx
-        dy = m.y - cy
-        d = math.sqrt(dx*dx + dy*dy)
-        if d < m.radius:
-            p.hp -= m.damage
-            c.remove(m)
-            if p.hp <= 0:
-                game = False
-    for weapon in b[:]:
-        for enemy in c[:]:
-            closest_x = max(weapon.rect.left, min(enemy.x, weapon.rect.right))
-            closest_y = max(weapon.rect.top, min(enemy.y, weapon.rect.bottom))
-            
-            distance_x = enemy.x - closest_x
-            distance_y = enemy.y - closest_y
-            distance = math.sqrt(distance_x * distance_x + distance_y * distance_y)
+    global game_running
+    for enemy in enemies:
+        closest_x = max(min(enemy.x ,player.square.right), player.square.left)
+        closest_y = max(min(enemy.y ,player.square.bottom), player.square.top)
+        distance_x = enemy.x - closest_x
+        distance_y = enemy.y - closest_y
+        distance = math.sqrt(distance_x*distance_x + distance_y*distance_y)
+        if distance < enemy.radius:
+            player.hp -= enemy.damage
+            enemies.remove(enemy)
+            if player.hp <= 0:
+                game_running = False
+        enemies_hit = []
+        bullets_hit = []
         
-            if distance < enemy.radius:
-                c.remove(enemy)
-                if weapon in b:
-                    b.remove(weapon)
-                break
+        for bullet in bullets:
+            for enemy in enemies:
+                closest_x = max(bullet.rect.left, min(enemy.x, bullet.rect.right))
+                closest_y = max(bullet.rect.top, min(enemy.y, bullet.rect.bottom))
+                
+                distance_x = enemy.x - closest_x
+                distance_y = enemy.y - closest_y
+                distance = math.sqrt(distance_x * distance_x + distance_y * distance_y)
+            
+                if distance < enemy.radius:
+                    if enemy not in enemies_hit:
+                        enemies_hit.append(enemy)
+                    if bullet not in bullets_hit:
+                        bullets_hit.append(bullet)
+        
+        for enemy in enemies_hit:
+            if enemy in enemies:
+                enemies.remove(enemy)
+        
+        for bullet in bullets_hit:
+            if bullet in bullets:
+                bullets.remove(bullet)
 
 def ui():
     font = pygame.font.SysFont(None, 48)
-    time = font.render(f"Time: {(t/60):.2f}", True, black)
-    hp = font.render(f"HP: {p.hp}", True, black)
-    screen.blit(time,(12,12))
-    screen.blit(hp,(12,100))
+    time_text = font.render(f"Time: {(time/60):.2f}", True, black)
+    hp_text = font.render(f"HP: {player.hp}", True, black)
+    screen.blit(time_text,(12,12))
+    screen.blit(hp_text,(12,100))
 
 while True:
     # screen.fill(green) 
@@ -151,30 +172,30 @@ while True:
             pygame.quit()
             sys.exit()
         if e.type == pygame.KEYDOWN:
-            if e.key == pygame.K_r and not game:
-                p = Player()
-                c.clear()
-                t = 0
-                b.clear()
-                game = True
-    if game:
+            if e.key == pygame.K_r and not game_running:
+                player = Player()
+                enemies.clear()
+                time = 0
+                bullets.clear()
+                game_running = True
+    if game_running:
         screen.fill(green) 
         keys = pygame.key.get_pressed()
-        t += 1
-        if t % 60 == 0:
-            spawn()
-        if t % 60==0:
-            spawnB()
-        for m in c:
-            m.move(p.x,p.y)
-        for m in b:
-            m.update()
+        time += 1
+        if time % 60 == 0:
+            spawn_enemy()
+        if time % 60==0:
+            spawn_bullet()
+        for enemy in enemies:
+            enemy.move(player.x, player.y)
+        for bullet in bullets:
+            bullet.update()
         collision()
 
         ui()
         
-        p.update()
-        if not game:
+        player.update()
+        if not game_running:
             font = pygame.font.SysFont(None, 160)
             text = font.render(f"Game Over", True, white)
             screen.blit(text,(W//2 - 290,H//2-50))

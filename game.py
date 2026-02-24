@@ -68,14 +68,14 @@ class Attack:
 
 class MeleeAttack:
     def __init__(self, x, y, direction="right"):
-        self.duration = 10             # frames the swing lasts
-        self.angle_step = 15           # degrees per frame
+        self.duration = 360             # frames the swing lasts
+        self.angle_step = 1            # degrees per frame
         self.current_angle = -45       # start angle relative to direction
         self.width = 10                # sword thickness
-        self.length = 60               # sword reach
+        self.length = 70               # sword reach
         self.x = x
         self.y = y
-        self.direction = direction     # "right", "left", "up", "down"
+        self.direction = direction    
 
     def update(self):
         if self.duration <= 0:

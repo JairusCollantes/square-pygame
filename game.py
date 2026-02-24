@@ -67,20 +67,37 @@ class Attack:
 
 
 class MeleeAttack:
-    def __init__(self, x, y):
-        self.range = 50
-        self.duration = 10
+    def __init__(self, x, y, direction="right"):
+        self.duration = 10             # frames the swing lasts
+        self.angle_step = 15           # degrees per frame
+        self.current_angle = -45       # start angle relative to direction
+        self.width = 10                # sword thickness
+        self.length = 60               # sword reach
         self.x = x
         self.y = y
+        self.direction = direction     # "right", "left", "up", "down"
 
     def update(self):
-        self.duration -= 1
         if self.duration <= 0:
             return False
-        pygame.draw.circle(screen, yellow, (int(self.x), int(self.y)), self.range, 2)
+
+        # Draw the rectangle as a rotated surface
+        surf = pygame.Surface((self.length, self.width), pygame.SRCALPHA)
+        surf.fill(yellow)
+        rotated_surf = pygame.transform.rotate(surf, self.current_angle)
+        rect = rotated_surf.get_rect(center=(self.x, self.y))
+        screen.blit(rotated_surf, rect.topleft)
+
+        # Move the swing angle
+        self.current_angle += self.angle_step
+        self.duration -= 1
+
+        # Collision with enemies
+        sword_rect = pygame.Rect(self.x - self.length//2, self.y - self.width//2, self.length, self.width)
         for enemy in enemies[:]:
-            if math.hypot(enemy.x - self.x, enemy.y - self.y) < self.range + enemy.radius:
+            if sword_rect.colliderect(pygame.Rect(enemy.x - enemy.radius, enemy.y - enemy.radius, enemy.radius*2, enemy.radius*2)):
                 enemies.remove(enemy)
+
         return True
 
 

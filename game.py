@@ -68,8 +68,8 @@ class Attack:
 
 class MeleeAttack:
     def __init__(self, x, y, direction="right"):
-        self.duration = 360             # frames the swing lasts
-        self.angle_step = 1            # degrees per frame
+        self.duration = 60             # frames the swing last
+        self.angle_step = 15            # degrees per frame
         self.current_angle = -45       # start angle relative to direction
         self.width = 10                # sword thickness
         self.length = 70               # sword reach
@@ -94,7 +94,14 @@ class MeleeAttack:
 
         sword_rect = pygame.Rect(self.x - self.length//2, self.y - self.width//2, self.length, self.width)
         for enemy in enemies[:]:
-            if sword_rect.colliderect(pygame.Rect(enemy.x - enemy.radius, enemy.y - enemy.radius, enemy.radius*2, enemy.radius*2)):
+            enemy_rect = pygame.Rect(
+                enemy.x - enemy.radius,
+                enemy.y - enemy.radius,
+                enemy.radius * 2,
+                enemy.radius * 2
+            )
+
+            if rect.colliderect(enemy_rect):
                 enemies.remove(enemy)
 
         return True
@@ -209,7 +216,7 @@ while True:
     if game_running:
         screen.fill(green)
         time += 1
-        if time % 60 == 0:
+        if time % 1 == 0:
             spawn_enemy()
         if time % 60 == 0:
             spawn_attack()

@@ -92,7 +92,6 @@ class MeleeAttack:
         self.current_angle += self.angle_step
         self.duration -= 1
 
-        # Collision with enemies
         sword_rect = pygame.Rect(self.x - self.length//2, self.y - self.width//2, self.length, self.width)
         for enemy in enemies[:]:
             if sword_rect.colliderect(pygame.Rect(enemy.x - enemy.radius, enemy.y - enemy.radius, enemy.radius*2, enemy.radius*2)):

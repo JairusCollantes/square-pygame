@@ -67,32 +67,44 @@ class Attack:
 
 
 class MeleeAttack:
-    def __init__(self, x, y, direction="right"):
-        self.duration = 60             # frames the swing last
-        self.angle_step = 15            # degrees per frame
-        self.current_angle = -45       # start angle relative to direction
-        self.width = 10                # sword thickness
-        self.length = 70               # sword reach
+    def __init__(self, x, y, base_angle):
         self.x = x
         self.y = y
-        self.direction = direction    
+
+        self.duration = 8
+        self.width = 10
+        self.length = 70
+
+        # Swing arc
+        self.start_angle = base_angle - 60
+        self.current_angle = self.start_angle
+        self.angle_step = 15
 
     def update(self):
         if self.duration <= 0:
             return False
 
-        # Draw the rectangle as a rotated surface
         surf = pygame.Surface((self.length, self.width), pygame.SRCALPHA)
         surf.fill(yellow)
-        rotated_surf = pygame.transform.rotate(surf, self.current_angle)
-        rect = rotated_surf.get_rect(center=(self.x, self.y))
-        screen.blit(rotated_surf, rect.topleft)
 
-        # Move the swing angle
+        rotated = pygame.transform.rotate(surf, self.current_angle)
+
+        rect = rotated.get_rect()
+
+        # Keep handle at player position
+        rect.center = (self.x, self.y)
+
+        # Push blade outward
+        rect.centerx += math.cos(math.radians(self.current_angle)) * self.length / 2
+        rect.centery -= math.sin(math.radians(self.current_angle)) * self.length / 2
+
+        screen.blit(rotated, rect)
+
+        # Move along arc
         self.current_angle += self.angle_step
         self.duration -= 1
 
-        sword_rect = pygame.Rect(self.x - self.length//2, self.y - self.width//2, self.length, self.width)
+        # Collision
         for enemy in enemies[:]:
             enemy_rect = pygame.Rect(
                 enemy.x - enemy.radius,
@@ -153,7 +165,7 @@ def spawn_attack():
     if weapon_type == "range":
         bullets.append(Attack(player.x, player.y))
     elif weapon_type == "melee":
-        bullets.append(MeleeAttack(player.x, player.y))
+        bullets.append(MeleeAttack(player.x, player.y, 0))
 
 def collision():
     global game_running

@@ -71,7 +71,7 @@ class MeleeAttack:
         self.x = x
         self.y = y
 
-        self.duration = 16
+        self.duration = 48
         self.width = 10
         self.length = 70
 
@@ -230,7 +230,7 @@ while True:
         time += 1
         if time % 1 == 0:
             spawn_enemy()
-        if time % 60 == 0:
+        if time % 50 == 0:
             spawn_attack()
 
         for enemy in enemies:

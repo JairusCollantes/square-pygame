@@ -71,7 +71,7 @@ class MeleeAttack:
         self.x = x
         self.y = y
 
-        self.duration = 8
+        self.duration = 16
         self.width = 10
         self.length = 70
 

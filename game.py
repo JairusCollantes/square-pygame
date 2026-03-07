@@ -34,12 +34,15 @@ class Player:
 class Attack:
     def __init__(self, x, y):
         self.side = 5
-        self.t = 120
+        self.t = 60
         self.rect = pygame.Rect(x - self.side//2, y - self.side//2, self.side, self.side)
         if enemies:
             closest_enemy = min(enemies, key=lambda e: math.hypot(e.x-x, e.y-y))
             dx = closest_enemy.x - x
             dy = closest_enemy.y - y
+            # closest_enemy = random.choice(enemies)
+            # dx = closest_enemy.x - x
+            # dy = closest_enemy.y - y
             dist = max(0.1, math.hypot(dx, dy))
             self.vx = (dx / dist) * 10
             self.vy = (dy / dist) * 10
@@ -184,7 +187,7 @@ def collision():
             for enemy in enemies[:]:
                 closest_x = max(bullet.rect.left, min(enemy.x, bullet.rect.right))
                 closest_y = max(bullet.rect.top, min(enemy.y, bullet.rect.bottom))
-                if math.hypot(enemy.x - closest_x, enemy.y - closest_y) < enemy.radius:
+                if math.hypot(enemy.x - closest_x, enemy.y - closest_y) < enemy.radius *2 :
                     enemies.remove(enemy)
                     if bullet in bullets:
                         bullets.remove(bullet)
@@ -193,6 +196,7 @@ def ui():
     font = pygame.font.SysFont(None, 48)
     screen.blit(font.render(f"Time: {(time/60):.2f}", True, black), (12,12))
     screen.blit(font.render(f"HP: {player.hp}", True, black), (12,100))
+    screen.blit(font.render(f'Enemies count {len(enemies)}', True, black), (12, 60))
 
 # ------------------- MAIN LOOP -------------------
 
@@ -230,7 +234,7 @@ while True:
         time += 1
         if time % 1 == 0:
             spawn_enemy()
-        if time % 50 == 0:
+        if time % 1 == 0:
             spawn_attack()
 
         for enemy in enemies:

@@ -232,7 +232,7 @@ while True:
         time += 1
         if time % 1 == 0:
             spawn_enemy()
-        if time % 1 == 0:
+        if time % 30 == 0:
             spawn_attack()
 
         for enemy in enemies:
@@ -241,6 +241,11 @@ while True:
         for bullet in bullets[:]:
             if not bullet.update():
                 bullets.remove(bullet)
+                
+        if keys[pygame.K_LSHIFT]:
+            speed = 7
+        else:
+            speed = 3
 
         collision()
         ui()

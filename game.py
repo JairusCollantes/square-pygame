@@ -37,12 +37,10 @@ class Attack:
         self.t = 60
         self.rect = pygame.Rect(x - self.side//2, y - self.side//2, self.side, self.side)
         if enemies:
+            # closest_enemy = random.choice(enemies) # random enemy
             closest_enemy = min(enemies, key=lambda e: math.hypot(e.x-x, e.y-y))
             dx = closest_enemy.x - x
             dy = closest_enemy.y - y
-            # closest_enemy = random.choice(enemies)
-            # dx = closest_enemy.x - x
-            # dy = closest_enemy.y - y
             dist = max(0.1, math.hypot(dx, dy))
             self.vx = (dx / dist) * 10
             self.vy = (dy / dist) * 10

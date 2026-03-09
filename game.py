@@ -11,6 +11,7 @@ black = (0, 0, 0)
 yellow = (255, 255, 0)
 pink = (255, 87, 183)
 speed = 3
+stamina = 6000
 
 pygame.init()
 screen = pygame.display.set_mode((W, H))
@@ -194,7 +195,8 @@ def ui():
     font = pygame.font.SysFont(None, 48)
     screen.blit(font.render(f"Time: {(time/60):.2f}", True, black), (12,12))
     screen.blit(font.render(f"HP: {player.hp}", True, black), (12,100))
-    screen.blit(font.render(f'Enemies count {len(enemies)}', True, black), (12, 60))
+    screen.blit(font.render(f'Stamina {stamina}', True, black), (12, 60))
+    screen.blit(font.render(f'Enemies count {len(enemies)}', True, black), (12, 140))
 
 # ------------------- MAIN LOOP -------------------
 
@@ -242,10 +244,18 @@ while True:
             if not bullet.update():
                 bullets.remove(bullet)
                 
-        if keys[pygame.K_LSHIFT]:
+        if keys[pygame.K_LSHIFT] and stamina > 60:
             speed = 7
+            stamina -= 60
         else:
             speed = 3
+            
+        if stamina < 3000:
+            stamina *= 1.02
+        if stamina > 3000 and stamina < 6000:
+            stamina += 1
+        if stamina < 0:
+            stamina = 1
 
         collision()
         ui()

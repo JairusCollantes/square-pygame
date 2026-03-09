@@ -232,7 +232,7 @@ while True:
     if game_running:
         screen.fill(green)
         time += 1
-        if time % 1 == 0:
+        if time % 60 == 0:
             spawn_enemy()
         if time % 30 == 0:
             spawn_attack()
@@ -250,10 +250,10 @@ while True:
         else:
             speed = 3
             
-        if stamina < 3000:
-            stamina *= 1.02
+        if stamina <= 3000:
+            stamina += 6
         if stamina > 3000 and stamina < 6000:
-            stamina += 1
+            stamina += 3
         if stamina < 0:
             stamina = 1
 
